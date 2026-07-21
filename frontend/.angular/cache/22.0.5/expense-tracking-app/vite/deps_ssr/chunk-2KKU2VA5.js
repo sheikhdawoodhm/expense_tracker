@@ -4,25 +4,29 @@ import {
   ROUTES,
   Router,
   loadChildren
-} from "./chunk-UAA7Q56X.js";
+} from "./chunk-DNHNMMYI.js";
 import {
   BrowserDomAdapter,
   BrowserModule,
   EVENT_MANAGER_PLUGINS,
-  EventManagerPlugin,
+  EventManagerPlugin
+} from "./chunk-RMJ3CMEL.js";
+import {
   HTTP_FETCH_MAX_RESPONSE_SIZE,
   HTTP_ROOT_INTERCEPTOR_FNS
-} from "./chunk-HS2G32K4.js";
+} from "./chunk-MABP72K7.js";
 import {
   APP_BASE_HREF,
   NullViewportScroller,
   PLATFORM_SERVER_ID,
+  ViewportScroller
+} from "./chunk-IMBQ3Q6C.js";
+import {
   PlatformLocation,
-  ViewportScroller,
   XhrFactory,
   getDOM,
   setRootDomAdapter
-} from "./chunk-ECDM7ABZ.js";
+} from "./chunk-S5CXVJK6.js";
 import {
   APP_ID,
   ApplicationRef,
@@ -59,7 +63,6 @@ import {
   makeEnvironmentProviders,
   platformCore,
   provideEnvironmentInitializer,
-  require_cjs,
   resetCompiledComponents,
   runInInjectionContext,
   setClassMetadata,
@@ -70,7 +73,10 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-CUDZMOIB.js";
+} from "./chunk-BDQ25J32.js";
+import {
+  require_cjs
+} from "./chunk-6VILRTX6.js";
 import {
   index
 } from "./chunk-U4TSCERF.js";
@@ -12660,4 +12666,4 @@ export {
   AngularAppEngine,
   createRequestHandler
 };
-//# sourceMappingURL=chunk-4CXHL7MB.js.map
+//# sourceMappingURL=chunk-2KKU2VA5.js.map

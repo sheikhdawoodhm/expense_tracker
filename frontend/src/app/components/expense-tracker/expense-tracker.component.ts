@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core'; 
+import { Component, signal, computed, inject, OnInit } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LedgerService, TrackerItem, TrackerType } from '../../services/ledger.service'; 
@@ -9,27 +9,26 @@ import { LedgerService, TrackerItem, TrackerType } from '../../services/ledger.s
   imports: [CommonModule, FormsModule],
   templateUrl: './expense-tracker.component.html',
 })
-export class ExpenseTrackerComponent {
+export class ExpenseTrackerComponent implements OnInit {
   private ledgerService = inject(LedgerService); 
 
   activeType = signal<TrackerType>('expense');
   isEditing = signal<boolean>(false);
-  editingId = signal<string | null>(null);
+  editingId = signal<number | null>(null); 
 
   categoriesMap = signal<{ [key in TrackerType]: string[] }>({
     expense: ['Food', 'Rent', 'Utilities', 'Entertainment'],
-    asset: ['Stocks', 'Savings Account', 'Real Estate', 'Crypto'],
-    liability: ['Credit Card', 'Mortgage', 'Student Loan', 'Car Loan']
+    asset: ['Cash', 'Stocks', 'Real Estate', 'Crypto'],
+    liability: ['Credit Card', 'Mortgage', 'Student Loan']
   });
 
   newCategoryName = '';
   showCustomInput = false;
 
   currentCategories = computed(() => this.categoriesMap()[this.activeType()]);
-  
-  
   items = this.ledgerService.items; 
 
+  // Updated Portfolio math to reflect your HTML template logic
   netBalance = computed(() => {
     return this.items().reduce((total, item) => {
       return item.type === 'asset' ? total + item.amount : total - item.amount;
@@ -41,6 +40,10 @@ export class ExpenseTrackerComponent {
     amount: 0,
     category: 'Food'
   };
+
+  ngOnInit() {
+    this.ledgerService.fetchItems().subscribe();
+  }
 
   changeType(type: TrackerType) {
     this.activeType.set(type);
@@ -68,42 +71,50 @@ export class ExpenseTrackerComponent {
     this.showCustomInput = false;
   }
 
-  saveItem() {
-    if (this.isEditing()) {
-      this.items.update(prev => prev.map(item => 
-        item.id === this.editingId() 
-          ? { ...item, ...this.formData, type: this.activeType() } 
-          : item
-      ));
-      this.resetForm();
-    } else {
-      const newItem: TrackerItem = {
-        id: crypto.randomUUID(),
-        type: this.activeType(),
-        title: this.formData.title,
-        amount: this.formData.amount,
-        category: this.formData.category,
-        date: new Date()
-      };
-      this.items.update(prev => [...prev, newItem]); 
-      this.resetForm();
-    }
+saveItem() {
+  const payload: TrackerItem = {
+    amount: this.formData.amount,
+    type: this.activeType(),
+    category: this.formData.category,
+    description: this.formData.title,
+    
+    transaction_date: new Date().toISOString().split('T')[0] 
+  };
+
+  if (this.isEditing() && this.editingId() !== null) {
+    this.ledgerService.updateItem(this.editingId()!, payload).subscribe({
+      next: () => this.resetForm(),
+      error: (err) => console.error('Failed to update record:', err)
+    });
+  } else {
+    this.ledgerService.addItem(payload).subscribe({
+      next: () => this.resetForm(),
+      error: (err) => console.error('Failed to add record:', err)
+    });
   }
+}
 
   editItem(item: TrackerItem) {
     this.isEditing.set(true);
-    this.editingId.set(item.id);
+    this.editingId.set(item.id || null);
     this.activeType.set(item.type);
     this.formData = {
-      title: item.title,
+      title: item.description,
       amount: item.amount,
       category: item.category
     };
   }
 
-  deleteItem(id: string) {
-    this.items.update(prev => prev.filter(item => item.id !== id));
-    if (this.editingId() === id) this.resetForm();
+  deleteItem(id: number | undefined) {
+    if (id === undefined) return;
+    if (confirm('Are you sure you want to delete this record?')) {
+      this.ledgerService.deleteItem(id).subscribe({
+        next: () => {
+          if (this.editingId() === id) this.resetForm();
+        },
+        error: (err) => console.error('Failed to delete transaction:', err)
+      });
+    }
   }
 
   resetForm() {
