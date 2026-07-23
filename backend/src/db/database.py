@@ -66,11 +66,23 @@ def init_db():
     );
     """
 
+    sessions_table = """
+    CREATE TABLE IF NOT EXISTS sessions (
+        id VARCHAR(36) PRIMARY KEY,
+        user_id INT NOT NULL,
+        refresh_token VARCHAR(512) NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE,
+        CONSTRAINT fk_user_sessions FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    """
+
     print("Syncing database structure...")
     with get_db_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute(users_table)
             cursor.execute(records_table)
             cursor.execute(goals_table)
+            cursor.execute(sessions_table)
             conn.commit()
     print(" Database verification complete.")

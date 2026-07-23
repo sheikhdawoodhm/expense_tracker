@@ -2,6 +2,8 @@ import { Injectable, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -31,9 +33,9 @@ export class AuthService {
 
   login(email: string, psw: string) {
     if (email && psw) {
-      this.http.post<{access_token: string, token_type: string}>(`${this.apiUrl}/login`, { email, password: psw }).subscribe({
+      this.http.post<{access_token: string, refresh_token: string, token_type: string}>(`${this.apiUrl}/login`, { email, password: psw }).subscribe({
         next: (res) => {
-          const sessionData = { email, uid: 'user_' + crypto.randomUUID(), access_token: res.access_token };
+          const sessionData = { email, access_token: res.access_token, refresh_token: res.refresh_token };
           this.currentUser.set(sessionData);
           this.isAuthenticated.set(true);
           if (typeof localStorage !== 'undefined') {
@@ -67,7 +69,29 @@ export class AuthService {
     }
   }
 
+  refreshToken(): Observable<{access_token: string, refresh_token: string, token_type: string}> {
+    const session = this.currentUser();
+    return this.http.post<{access_token: string, refresh_token: string, token_type: string}>(`${this.apiUrl}/refresh`, { refresh_token: session?.refresh_token }).pipe(
+      tap(res => {
+        if (session) {
+          const newSession = { ...session, access_token: res.access_token };
+          this.currentUser.set(newSession);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('auth_session', JSON.stringify(newSession));
+          }
+        }
+      })
+    );
+  }
+
   logout() {
+    this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
+      next: () => this.clearSession(),
+      error: () => this.clearSession()
+    });
+  }
+
+  private clearSession() {
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
     if (typeof localStorage !== 'undefined') {
