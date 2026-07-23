@@ -6,15 +6,14 @@ from psycopg2.extras import RealDictCursor
 
 # Reads from environment (loaded first in main.py)
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql://postgres:password@localhost:5432/finance_db"
+    "DATABASE_URL"
 )
 
 try:
     db_pool = SimpleConnectionPool(1, 10, dsn=DATABASE_URL)
-    print("🚀 Database connection pool initialized.")
+    print("Database connection pool initialized.")
 except Exception as e:
-    print(f"❌ Failed to initialize database pool: {e}")
+    print(f" Failed to initialize database pool: {e}")
     db_pool = None
 
 @contextmanager
@@ -47,7 +46,6 @@ def init_db():
     CREATE TABLE IF NOT EXISTS financial_records (
         id SERIAL PRIMARY KEY,
         user_id INT NOT NULL,
-        title VARCHAR(150) NOT NULL,
         amount NUMERIC(12, 2) NOT NULL,
         type VARCHAR(30) NOT NULL CHECK (type IN ('expense', 'asset', 'liability')),
         category VARCHAR(100) NOT NULL,
@@ -71,11 +69,11 @@ def init_db():
     );
     """
 
-    print("⚡ Syncing database structure...")
+    print("Syncing database structure...")
     with get_db_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute(users_table)
             cursor.execute(records_table)
             cursor.execute(goals_table)
             conn.commit()
-    print("✅ Database verification complete.")
+    print(" Database verification complete.")
