@@ -1,4 +1,5 @@
-from src.db.tableCreation import get_db_connection
+from src.db.database import get_db_connection
+from psycopg2.extras import RealDictCursor
 from typing import List, Tuple, Dict, Any
 
 class AnalyticsRepository:
@@ -22,19 +23,40 @@ class AnalyticsRepository:
                 return float(assets), float(liabilities), float(expenses)
 
     @staticmethod
-    def get_raw_category_sums(user_id: int) -> List[Dict[str, Any]]:
-        """Queries raw total spend grouped by category."""
+    def get_raw_category_sums(user_id: int) -> list:
         with get_db_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT category, COALESCE(SUM(amount), 0) as total_amount
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT category, SUM(amount) as "totalAmount"
                     FROM financial_records
                     WHERE user_id = %s AND type = 'expense'
                     GROUP BY category
-                    ORDER BY total_amount DESC;
-                    """,
-                    (user_id,)
-                )
-                rows = cursor.fetchall()
-                return [{"category": row[0], "totalAmount": float(row[1])} for row in rows]
+                    ORDER BY "totalAmount" DESC
+                """, (user_id,))
+                return cursor.fetchall()
+
+    @staticmethod
+    def get_latest_goal(user_id: int) -> dict:
+        with get_db_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT title, target_threshold, monthly_contribution, estimated_horizon_months, category, is_completed
+                    FROM financial_goals
+                    WHERE user_id = %s
+                    ORDER BY id DESC
+                    LIMIT 1
+                """, (user_id,))
+                return cursor.fetchone()
+
+    @staticmethod
+    def save_goal(user_id: int, title: str, target_threshold: float, monthly_contribution: float) -> dict:
+        with get_db_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("""
+                    INSERT INTO financial_goals (user_id, title, target_threshold, monthly_contribution, estimated_horizon_months, category, is_completed)
+                    VALUES (%s, %s, %s, %s, 0, 'General', FALSE)
+                    RETURNING id, title, target_threshold, monthly_contribution
+                """, (user_id, title, target_threshold, monthly_contribution))
+                row = cursor.fetchone()
+                conn.commit()
+                return row

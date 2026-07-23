@@ -8,10 +8,10 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="min-h-screen bg-[#0b0e14] text-white flex flex-col md:flex-row font-sans">
+    <div class="h-screen overflow-hidden bg-[#0b0e14] text-white flex flex-col md:flex-row font-sans">
       
       
-      <aside class="w-full md:w-64 bg-[#111827] border-b md:border-b-0 md:border-r border-[#1f2937] p-6 flex flex-col justify-between">
+      <aside class="w-full md:w-64 shrink-0 bg-[#111827] border-b md:border-b-0 md:border-r border-[#1f2937] p-6 flex flex-col justify-between z-10 shadow-lg">
         <div>
           
           <div class="mb-8">

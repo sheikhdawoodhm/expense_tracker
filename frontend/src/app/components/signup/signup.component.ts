@@ -1,35 +1,35 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-signup',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="min-h-screen bg-[#0b0e14] flex items-center justify-center p-4 font-sans text-white">
       <div class="w-full max-w-md bg-[#111827] border border-[#1f2937] p-8 rounded-2xl shadow-2xl">
-        <h2 class="text-2xl font-bold text-center text-blue-500 mb-2">Welcome Back</h2>
-        <p class="text-xs text-gray-400 text-center mb-6">Log in to manage your live aggregate allocations</p>
+        <h2 class="text-2xl font-bold text-center text-green-500 mb-2">Create Account</h2>
+        <p class="text-xs text-gray-400 text-center mb-6">Get tracking your assets, expenses, and liabilities</p>
         
-        <form (ngSubmit)="loginForm.valid && onLogin()" #loginForm="ngForm" class="space-y-4">
+        <form (ngSubmit)="signupForm.valid && onSignup()" #signupForm="ngForm" class="space-y-4">
           <div>
             <label class="block text-xs text-gray-400 mb-1">Email Address</label>
             <input type="email" [(ngModel)]="email" name="email" required autocomplete="off"
                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" #emailRef="ngModel"
-                   class="w-full p-2.5 bg-[#1f2937] border border-[#374151] rounded-md focus:border-blue-500 focus:outline-none text-sm"/>
+                   class="w-full p-2.5 bg-[#1f2937] border border-[#374151] rounded-md focus:border-green-500 focus:outline-none text-sm"/>
             @if (emailRef.invalid && (emailRef.dirty || emailRef.touched)) {
               <div class="text-red-500 text-[10px] mt-1">Please enter a valid email address.</div>
             }
           </div>
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Password</label>
+            <label class="block text-xs text-gray-400 mb-1">Create Password</label>
             <div class="relative">
               <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" required
                      minlength="6" #passwordRef="ngModel"
-                     class="w-full p-2.5 bg-[#1f2937] border border-[#374151] rounded-md focus:border-blue-500 focus:outline-none text-sm pr-10"/>
+                     class="w-full p-2.5 bg-[#1f2937] border border-[#374151] rounded-md focus:border-green-500 focus:outline-none text-sm pr-10"/>
               <button type="button" (click)="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer focus:outline-none">
                 @if (showPassword) {
                   <!-- Open Eye -->
@@ -49,24 +49,24 @@ import { RouterLink } from '@angular/router';
               <div class="text-red-500 text-[10px] mt-1">Password must be at least 6 characters.</div>
             }
           </div>
-          <button type="submit" [disabled]="loginForm.invalid" class="w-full p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 font-bold rounded-md transition-colors cursor-pointer text-sm mt-2">
-            Sign In
+          <button type="submit" [disabled]="signupForm.invalid" class="w-full p-3 bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-50 font-bold rounded-md transition-colors cursor-pointer text-sm mt-2">
+            Register Account
           </button>
         </form>
         <p class="text-xs text-center text-gray-400 mt-6">
-          Don't have an account? <a routerLink="/signup" class="text-blue-400 hover:underline cursor-pointer">Register here</a>
+          Already verified? <a routerLink="/login" class="text-green-400 hover:underline cursor-pointer">Sign in instead</a>
         </p>
       </div>
     </div>
   `
 })
-export class LoginComponent {
+export class SignupComponent {
   private authService = inject(AuthService);
   email = '';
   password = '';
   showPassword = false;
 
-  onLogin() {
-    this.authService.login(this.email, this.password);
+  onSignup() {
+    this.authService.signup(this.email, this.password);
   }
 }

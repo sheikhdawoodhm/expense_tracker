@@ -7,7 +7,7 @@
     <h1 class="mt-2 text-4xl font-bold"
         [class.text-green-500]="netBalance() >= 0"
         [class.text-red-500]="netBalance() < 0">
-      {{ netBalance() >= 0 ? '+' : '' }}{{ netBalance() | currency:'USD':'symbol':'1.2-2' }}
+      {{ netBalance() >= 0 ? '+' : '' }}{{ netBalance() | currency:'INR':'symbol':'1.2-2' }}
     </h1>
   </div>
 
@@ -55,7 +55,7 @@
 
         
         <div>
-          <label class="block text-xs text-gray-400 mb-1">Amount ($)</label>
+          <label class="block text-xs text-gray-400 mb-1">Amount (₹)</label>
           <input type="number" step="0.01" [(ngModel)]="formData.amount" name="amount" required
                  class="w-full p-2 bg-[#1f2937] border border-[#374151] text-white rounded-md focus:border-blue-500 focus:outline-none text-sm"/>
         </div>
@@ -86,18 +86,17 @@
     @if (showCustomInput) {
       <div class="mt-2 p-3 bg-[#1f2937]/50 rounded-lg border border-dashed border-gray-700 space-y-2">
         <label class="block text-[11px] text-blue-400 font-medium">Create New {{ activeType() }} Category</label>
-        <div class="flex gap-1">
+        <div class="flex flex-wrap gap-2">
           <input type="text" [(ngModel)]="newCategoryName" name="newCategoryName" 
                 placeholder="e.g., Education, Medical, Insurance" autocomplete="off"
-                class="flex-1 p-1.5 bg-[#1f2937] border border-[#4b5563] text-white text-xs rounded focus:border-blue-500 focus:outline-none"/>
+                class="flex-1 min-w-[150px] p-1.5 bg-[#1f2937] border border-[#4b5563] text-white text-xs rounded focus:border-blue-500 focus:outline-none"/>
           
           <button type="button" (click)="addCustomCategory()" 
-                  class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 font-bold rounded cursor-pointer transition-colors">
+                  class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 font-bold rounded cursor-pointer transition-colors shrink-0">
             Save
           </button>
           <button type="button" (click)="showCustomInput = false; formData.category = currentCategories()[0]" 
-                  class="text-gray-400 hover:text-white text-xs  
-                  px-1 cursor-pointer">
+                  class="text-gray-400 hover:text-white text-xs px-2 cursor-pointer shrink-0">
             Cancel
           </button>
         </div>
@@ -132,38 +131,40 @@
             Ledger cleared. Add a transaction item to launch tracking calculations!
         </div>
       } @else {
-        
-        @for (item of items(); track item.id) {
-          <div class="flex justify-between items-center py-3 border-b border-[#1f2937] last:border-b-0">
-            <div>
-              <div class="flex items-center gap-2">
-                <strong class="block text-white text-sm font-semibold">{{ item.title }}</strong>
-                
-                @switch (item.type) {
-                  @case ('expense') { <span class="text-[9px] px-1.5 py-0.2 rounded border border-red-500/30 bg-red-950/40 text-red-400 uppercase tracking-tight">Exp</span> }
-                  @case ('asset') { <span class="text-[9px] px-1.5 py-0.2 rounded border border-green-500/30 bg-green-950/40 text-green-400 uppercase tracking-tight">Asst</span> }
-                  @case ('liability') { <span class="text-[9px] px-1.5 py-0.2 rounded border border-amber-500/30 bg-amber-950/40 text-amber-400 uppercase tracking-tight">Liab</span> }
-                }
+        <div class="max-h-[500px] overflow-y-auto overflow-x-hidden pr-2">
+          @for (item of items(); track item.id) {
+            <div class="flex justify-between items-center py-3 border-b border-[#1f2937] last:border-b-0 gap-4">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <strong class="block text-white text-sm font-semibold truncate">{{ item.title }}</strong>
+                  
+                  @switch (item.type) {
+                    @case ('expense') { <span class="text-[9px] px-1.5 py-0.2 rounded border border-red-500/30 bg-red-950/40 text-red-400 uppercase tracking-tight shrink-0">Exp</span> }
+                    @case ('asset') { <span class="text-[9px] px-1.5 py-0.2 rounded border border-green-500/30 bg-green-950/40 text-green-400 uppercase tracking-tight shrink-0">Asst</span> }
+                    @case ('liability') { <span class="text-[9px] px-1.5 py-0.2 rounded border border-amber-500/30 bg-amber-950/40 text-amber-400 uppercase tracking-tight shrink-0">Liab</span> }
+                  }
+                </div>
+                <span class="text-xs text-gray-400 block mt-0.5 truncate">
+                  {{ item.category }} • {{ item.date | date:'medium' }}
+                </span>
               </div>
-              <span class="text-xs text-gray-400 block mt-0.5">
-                {{ item.category }} • {{ item.date | date:'shortTime' }}
-              </span>
+              
+              <div class="flex items-center gap-4">
+                
+                <span class="font-bold text-sm shrink-0"
+                      [class.text-red-500]="item.type === 'expense' || item.type === 'liability'"
+                      [class.text-green-500]="item.type === 'asset'">
+                  {{ item.type === 'asset' ? '+' : '-' }}{{ item.amount | currency:'INR':'symbol':'1.2-2' }}
+                </span>
+                
+                <div class="flex items-center gap-2 shrink-0">
+                  <button (click)="editItem(item)" title="Modify Record" class="text-amber-500 hover:scale-110 transition-transform cursor-pointer text-sm">✏️</button>
+                  <button (click)="deleteItem(item.id)" title="Purge Record" class="text-red-500 hover:scale-110 transition-transform cursor-pointer text-sm">🗑️</button>
+                </div>
+              </div>
             </div>
-            
-            <div class="flex items-center gap-4">
-              
-              <span class="font-bold text-sm"
-                    [class.text-red-500]="item.type === 'expense' || item.type === 'liability'"
-                    [class.text-green-500]="item.type === 'asset'">
-                {{ item.type === 'asset' ? '+' : '-' }}{{ item.amount | currency }}
-              </span>
-              
-              
-              <button (click)="editItem(item)" title="Modify Record" class="text-amber-500 hover:scale-110 transition-transform cursor-pointer text-sm">✏️</button>
-              <button (click)="deleteItem(item.id)" title="Purge Record" class="text-red-500 hover:scale-110 transition-transform cursor-pointer text-sm">🗑️</button>
-            </div>
-          </div>
-        }
+          }
+        </div>
       }
     </div>
 

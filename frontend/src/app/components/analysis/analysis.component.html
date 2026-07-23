@@ -1,31 +1,29 @@
 <div class="space-y-6 text-white max-w-5xl mx-auto p-4 bg-[#0b0e14] min-h-screen">
 
-  
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="bg-[#111827] border border-[#1f2937] p-5 rounded-2xl">
-      <span class="text-xs text-gray-400 font-bold tracking-wider uppercase">Gross Assets Pool</span>
-      <h2 class="text-3xl font-black text-emerald-400 mt-1">${{ totalAssets() | number }}</h2>
+    <div class="bg-[#111827] border border-[#1f2937] p-5 rounded-2xl min-w-0">
+      <span class="text-xs text-gray-400 font-bold tracking-wider uppercase truncate block">Gross Assets</span>
+      <h2 class="text-3xl font-black text-emerald-400 mt-1 truncate" title="₹{{ totalAssets() | number }}">₹{{ totalAssets() | number }}</h2>
     </div>
     
-    <div class="bg-[#111827] border border-[#1f2937] p-5 rounded-2xl">
-      <span class="text-xs text-gray-400 font-bold tracking-wider uppercase">Outstanding Liabilities</span>
-      <h2 class="text-3xl font-black text-red-400 mt-1">${{ totalLiabilities() | number }}</h2>
+    <div class="bg-[#111827] border border-[#1f2937] p-5 rounded-2xl min-w-0">
+      <span class="text-xs text-gray-400 font-bold tracking-wider uppercase truncate block">Outstanding Liabilities</span>
+      <h2 class="text-3xl font-black text-red-400 mt-1 truncate" title="₹{{ totalLiabilities() | number }}">₹{{ totalLiabilities() | number }}</h2>
     </div>
 
-    <div class="bg-[#111827] border border-[#1f2937] p-5 rounded-2xl bg-gradient-to-br from-[#111827] to-[#1e1b4b]">
-      <span class="text-xs text-indigo-300 font-bold tracking-wider uppercase">Calculated Net Worth</span>
-      <h2 class="text-3xl font-black text-blue-400 mt-1">${{ netWorth() | number }}</h2>
+    <div class="bg-[#111827] border border-[#1f2937] p-5 rounded-2xl bg-gradient-to-br from-[#111827] to-[#1e1b4b] min-w-0">
+      <span class="text-xs text-indigo-300 font-bold tracking-wider uppercase truncate block">Net Worth</span>
+      <h2 class="text-3xl font-black text-blue-400 mt-1 truncate" title="₹{{ netWorth() | number }}">₹{{ netWorth() | number }}</h2>
     </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-    
     <div class="bg-[#111827] border border-[#1f2937] p-6 rounded-2xl flex items-center justify-between">
       <div class="space-y-2 max-w-[60%]">
         <h3 class="text-lg font-bold text-gray-100">Healthy Spending Index</h3>
         <p class="text-xs text-gray-400 leading-relaxed">
-          Compares active expense layouts (${{ totalExpenses() | number }}) dynamically balancing against your active asset reserves (${{ totalAssets() | number }}).
+          Compares expenses (₹{{ totalExpenses() | number }}) dynamically balancing against your active asset reserves (₹{{ totalAssets() | number }}).
         </p>
       </div>
 
@@ -45,57 +43,69 @@
       </div>
     </div>
 
-    
     <div class="bg-[#111827] border border-[#1f2937] p-6 rounded-2xl flex flex-col justify-between">
       <div class="space-y-4">
         <h3 class="text-lg font-bold text-gray-100">Goal Calculator Horizon</h3>
         
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] text-gray-400 font-bold uppercase mb-1">Milestone Objective</label>
-            <input type="text" [(ngModel)]="goalName" class="w-full bg-[#0b0e14] border border-[#1f2937] rounded-lg p-2 text-xs font-semibold text-white focus:outline-none focus:border-blue-500" />
+            <input 
+              type="text" 
+              [ngModel]="goalName()" 
+              (ngModelChange)="goalName.set($event)" 
+              (blur)="saveGoalSettings()"
+              class="w-full bg-[#0b0e14] border border-[#1f2937] rounded-lg p-2 text-xs font-semibold text-white focus:outline-none focus:border-blue-500" />
           </div>
           <div>
-            <label class="block text-[10px] text-gray-400 font-bold uppercase mb-1">Target Threshold ($)</label>
-            <input type="number" [(ngModel)]="goalTargetAmount" class="w-full bg-[#0b0e14] border border-[#1f2937] rounded-lg p-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-blue-500" />
+            <label class="block text-[10px] text-gray-400 font-bold uppercase mb-1">Target Threshold (₹)</label>
+            <input 
+              type="number" 
+              [ngModel]="goalTargetAmount()" 
+              (ngModelChange)="goalTargetAmount.set($event)" 
+              (blur)="saveGoalSettings()"
+              class="w-full bg-[#0b0e14] border border-[#1f2937] rounded-lg p-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-blue-500" />
           </div>
         </div>
 
         <div>
-          <label class="block text-[10px] text-gray-400 font-bold uppercase mb-1">Assumed Monthly Savings Rate ($/mo)</label>
-          <input type="number" [(ngModel)]="monthlySavingsContribution" class="w-36 bg-[#0b0e14] border border-[#1f2937] rounded-lg p-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-blue-500" />
+          <label class="block text-[10px] text-gray-400 font-bold uppercase mb-1">Assumed Monthly Savings Rate (₹/mo)</label>
+          <input 
+            type="number" 
+            [ngModel]="monthlySavingsContribution()" 
+            (ngModelChange)="monthlySavingsContribution.set($event)" 
+            (blur)="saveGoalSettings()"
+            class="w-full sm:w-36 bg-[#0b0e14] border border-[#1f2937] rounded-lg p-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-blue-500" />
         </div>
       </div>
 
-      <div class="mt-6 pt-4 border-t border-[#1f2937] flex justify-between items-center">
-        <div>
-          <p class="text-[11px] text-gray-400">Estimated Horizon for <span class="text-blue-400 font-semibold">{{ goalName() }}</span>:</p>
+      <div class="mt-6 pt-4 border-t border-[#1f2937] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="min-w-0 w-full sm:w-auto flex-1">
+          <p class="text-[11px] text-gray-400 truncate">Estimated Horizon for <span class="text-blue-400 font-semibold">{{ goalName() }}</span>:</p>
           <div class="flex items-baseline gap-1 mt-0.5">
-            <span class="text-4xl font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+            <span class="text-4xl font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 truncate max-w-full">
               {{ monthsToReachGoal() }}
             </span>
-            <span class="text-xs text-gray-400 font-bold">Months</span>
+            <span class="text-xs text-gray-400 font-bold shrink-0">Months</span>
           </div>
         </div>
-        <p class="text-right text-[10px] font-mono text-gray-500 max-w-[160px]">
-          Target Variance: Max ${{ (goalTargetAmount() - netWorth() > 0 ? goalTargetAmount() - netWorth() : 0) | number }} Remaining
+        <p class="text-left sm:text-right text-[10px] font-mono text-gray-500 w-full sm:max-w-[160px] truncate shrink-0">
+          Target Variance: Max ₹{{ targetVariance() | number }} Remaining
         </p>
       </div>
     </div>
 
-    
     <div class="bg-[#111827] border border-[#1f2937] p-6 rounded-2xl lg:col-span-2 space-y-4">
       <div>
         <h3 class="text-lg font-bold text-gray-100">Category Outlay Visualizations</h3>
-        <p class="text-xs text-gray-400">Proportional layout aggregations calculated directly using expense array categories</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         <div *ngFor="let group of categoryWiseSpending()" class="bg-[#0b0e14] p-4 rounded-xl border border-[#1f2937]/60 space-y-2">
-          <div class="flex justify-between items-baseline">
-            <span class="text-sm font-bold text-gray-200">{{ group.category }}</span>
-            <span class="text-xs font-mono text-gray-400">
-              <strong class="text-white">${{ group.totalAmount | number }}</strong> ({{ group.percentageOfTotalExpenses | number:'1.0-1' }}%)
+          <div class="flex justify-between items-baseline gap-3">
+            <span class="text-sm font-bold text-gray-200 truncate flex-1 min-w-0" [title]="group.category">{{ group.category }}</span>
+            <span class="text-xs font-mono text-gray-400 shrink-0 max-w-[50%] truncate text-right" [title]="'₹' + (group.totalAmount | number) + ' (' + (group.percentageOfTotalExpenses | number:'1.0-1') + '%)'">
+              <strong class="text-white">₹{{ group.totalAmount | number }}</strong> ({{ group.percentageOfTotalExpenses | number:'1.0-1' }}%)
             </span>
           </div>
           
@@ -107,7 +117,7 @@
         </div>
 
         <div *ngIf="categoryWiseSpending().length === 0" class="text-xs text-gray-500 py-4 text-center col-span-2">
-          Add operational expense tracking inputs to build graph calculations.
+          No operational expense tracking inputs available.
         </div>
       </div>
     </div>

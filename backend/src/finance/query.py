@@ -1,20 +1,20 @@
-from src.db.tableCreation import get_db_connection
+from src.db.database import get_db_connection
 from src.finance.schemas import ExpenseCreate
 
 class ExpenseRepository:
     @staticmethod
     def save(expense: ExpenseCreate, user_id: int = 1) -> dict:
-        """Saves item directly inside financial_records table."""
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO financial_records (user_id, amount, type, category, description, date) 
-                    VALUES (%s, %s, %s, %s, %s, %s) 
-                    RETURNING id, user_id, amount, type, category, description, date;
+                    INSERT INTO financial_records (user_id, title, amount, type, category, description, date) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s) 
+                    RETURNING id, user_id, title, amount, type, category, description, date;
                     """,
                     (
                         user_id,
+                        expense.title,
                         expense.amount,
                         expense.transaction_type.value,
                         expense.category,
@@ -27,21 +27,21 @@ class ExpenseRepository:
                 return {
                     "id": row[0],
                     "user_id": row[1],
-                    "amount": float(row[2]),
-                    "type": row[3],
-                    "category": row[4],
-                    "description": row[5],
-                    "date": row[6]
+                    "title": row[2],
+                    "amount": float(row[3]),
+                    "type": row[4],
+                    "category": row[5],
+                    "description": row[6],
+                    "date": row[7]
                 }
 
     @staticmethod
     def fetch_all(user_id: int = 1) -> list:
-        """Fetches all financial records strictly belonging to the active user."""
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT id, user_id, amount, type, category, description, date 
+                    SELECT id, user_id, title, amount, type, category, description, date 
                     FROM financial_records 
                     WHERE user_id = %s 
                     ORDER BY date DESC, id DESC;
@@ -52,26 +52,27 @@ class ExpenseRepository:
                 return [{
                     "id": r[0],
                     "user_id": r[1],
-                    "amount": float(r[2]),
-                    "type": r[3],
-                    "category": r[4],
-                    "description": r[5],
-                    "date": r[6]
+                    "title": r[2],
+                    "amount": float(r[3]),
+                    "type": r[4],
+                    "category": r[5],
+                    "description": r[6],
+                    "date": r[7]
                 } for r in rows]
 
     @staticmethod
     def update(expense_id: int, expense: ExpenseCreate, user_id: int = 1) -> dict:
-        """Updates an existing financial record."""
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
                     UPDATE financial_records 
-                    SET amount = %s, type = %s, category = %s, description = %s, date = %s 
+                    SET title = %s, amount = %s, type = %s, category = %s, description = %s, date = %s 
                     WHERE id = %s AND user_id = %s 
-                    RETURNING id, user_id, amount, type, category, description, date;
+                    RETURNING id, user_id, title, amount, type, category, description, date;
                     """,
                     (
+                        expense.title,
                         expense.amount,
                         expense.transaction_type.value,
                         expense.category,
@@ -88,11 +89,12 @@ class ExpenseRepository:
                 return {
                     "id": row[0],
                     "user_id": row[1],
-                    "amount": float(row[2]),
-                    "type": row[3],
-                    "category": row[4],
-                    "description": row[5],
-                    "date": row[6]
+                    "title": row[2],
+                    "amount": float(row[3]),
+                    "type": row[4],
+                    "category": row[5],
+                    "description": row[6],
+                    "date": row[7]
                 }
 
     @staticmethod
